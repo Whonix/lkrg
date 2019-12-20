@@ -1,29 +1,5 @@
-lkrg (0:0.7.3-1) unstable; urgency=medium
+lkrg (0.7.3-1) unstable; urgency=medium
 
-  * New upstream version (local package).
+  * Initial release. (Closes: #944476)
 
  -- Patrick Schleizer <adrelanos@riseup.net>  Thu, 28 Nov 2019 14:56:21 +0000
-
-lkrg (0:0.7.2-1) unstable; urgency=medium
-
-  * New upstream version (local package).
-
- -- Patrick Schleizer <adrelanos@riseup.net>  Tue, 19 Nov 2019 15:24:27 +0000
-
-lkrg (0:0.7.1-1) unstable; urgency=medium
-
-  * New upstream version (local package).
-
- -- Patrick Schleizer <adrelanos@riseup.net>  Mon, 18 Nov 2019 10:12:24 +0000
-
-lkrg (0:0.7.0-1) unstable; urgency=medium
-
-  * New upstream version (local package).
-
- -- Patrick Schleizer <adrelanos@riseup.net>  Wed, 13 Nov 2019 08:56:09 +0000
-
-lkrg (0:0.0-1) unstable; urgency=medium
-
-  * Initial release (local package).
-
- -- Patrick Schleizer <adrelanos@riseup.net>  Tue, 12 Nov 2019 23:55:32 +0000
