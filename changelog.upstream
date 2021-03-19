@@ -1,8 +1,205 @@
+commit eef77341ec0ec0460cbc8fb5a3bb767c24f87b36
+Merge: 169324e 7092d7a
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Fri Mar 19 08:38:55 2021 -0400
+
+    Merge remote-tracking branch 'adam/main'
+
+commit 169324e5b488e1056e6c816f86bfa992756a95ea
+Author: Patrick Schleizer <adrelanos@whonix.org>
+Date:   Wed Mar 17 11:38:03 2021 -0400
+
+    bumped changelog version
+
 commit e409ee7094c9060b1b458a15d67442d7767d567d
 Author: Patrick Schleizer <adrelanos@whonix.org>
 Date:   Wed Mar 17 09:45:17 2021 -0400
 
     copyright
+
+commit 7092d7aa0c0e69820300b86cf240713286bc0d6d
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Fri Mar 5 15:18:57 2021 -0500
+
+    Add support for RHEL 8.3
+    
+    RHEL 8.3 backported modern *_JUMP_LABEL logic to own kernels. This commit
+    add supports for it.
+
+commit b42ef9c1d539fb783f20180fec8cfb86c5d65030
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Thu Mar 4 19:47:24 2021 +0300
+
+    scripts: double-quote variables and expansions, copy file with archive mode
+
+commit ffdc3c62c2502efc95f69a3404d4f3fe0dce2dda
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Thu Mar 4 19:46:00 2021 +0300
+
+    lkrg-bootup.sh: exec P_LKRG_SYSTEMD
+
+commit 9a42e579110198bd0308030e9a17706a05c6d103
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Thu Mar 4 19:44:58 2021 +0300
+
+    scripts: do not use P_PWD
+
+commit 70b30cb579d607448cf5ad16a199f47ba9b48f9f
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Wed Mar 3 20:46:52 2021 +0300
+
+    lkrg-bootup.sh: canonicalize readlink
+
+commit d114423af47672c9baf2effa4d8bf1e60a21760f
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Wed Mar 3 20:42:54 2021 +0300
+
+    lkrg-bootup.sh: wrap variables with double quotes to prevent word splitting
+
+commit 18c927ef534f3457e7574ec0fe438f4ca8e3ee1c
+Author: 0xC0ncord <me@concord.sh>
+Date:   Tue Mar 2 18:36:05 2021 -0500
+
+    copy-builtin: fix syntax error
+    
+    This fixes the following error when using bash:
+    bash: [: missing `]'
+
+commit 2a65bdf58eacd4cd8bb17b3d032e3d9d1c2fa5e7
+Author: Vladimir D. Seleznev <vseleznv@altlinux.org>
+Date:   Tue Mar 2 11:38:54 2021 +0300
+
+    Fix compilation fo kernel 5.11 on arm64
+    
+    Since kernel commit 3d2403fd10a1dbb359b154af41ffed9f2a7520e8 there is no
+    more addr_limit on arm64.
+
+commit abaca2fc7218fb992a2836d005db5c035851b4a6
+Author: RageLtMan <rageltman [at] sempervictus>
+Date:   Mon Feb 22 19:08:29 2021 -0500
+
+    Copy-builtin: optionally use git via LKRG_USE_GIT
+    
+    As pointed out by Solar Designer, git is somewhat non-germaine to
+    the script as it's really part of an external workflow replicated
+    across out-of-tree repos used by Semper Victus for the trees which
+    we maintain in-house. The meat of the function in ths script puts
+    data into the right places within a kernel tree, with the commit
+    semantics being an ancillary function.
+    
+    Make all of the git operations optional by enclosing them in tests
+    for the existence of the LKRG_USE_GIT variable.
+
+commit 64491151a933fd8a635f89ecf409c666d220749f
+Author: 0xC0ncord <me@concord.sh>
+Date:   Thu Feb 18 11:09:56 2021 -0500
+
+    copy-builtin: avoid errors when committing changes
+    
+    If the source tree is not a git repository or git is not installed,
+    avoid throwing errors.
+
+commit 007093a5c70ee4ef3866cd5ebcf1c73d1b98e4aa
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Fri Feb 19 13:52:24 2021 -0500
+
+    Minor cleanup
+
+commit 8a3aaa65c0fb97064139d2f361ad82ab6e28a377
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Fri Feb 19 02:22:22 2021 -0500
+
+    Fix LKRG on x86 32 bits arch (IA-32)
+    
+    Since Linux kernel 5.7 SYSCALL_WRAPPER's magic was backported to x86 (32
+    bits) as well. This commit bring the support for it.
+    However, regardless of the SYSCALL_WRAPPER's magic LKRG was broken on IA-32
+    and this commit "resurrects" such support. It also addresses #49 and #46
+
+commit 4a3b01180405096e944e092691236f22bfaa5407
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Tue Feb 16 00:17:46 2021 -0500
+
+    Allow CONFIG_RT_MUTEXES if CONFIG_PREEMPT_RT is not defined
+    
+    Commit ec16f777f7a0d25f9c2aa2925cacfa7f08bc0eec was too restrictive
+
+commit ec16f777f7a0d25f9c2aa2925cacfa7f08bc0eec
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Tue Feb 16 00:06:26 2021 -0500
+
+    Do not support RT kernels
+    
+    We do not want to support RT kernels (at least not for now). RT kernels are
+    commonly used in medical and similar devices, where reliability is crucial.
+    It is safer to to not support RT kernels in LKRG for now.
+    For more information please read entire discussion at #40.
+
+commit da571d3e8a35b2d6ea45e760d2da27aaada5eafb
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Thu Feb 11 21:23:30 2021 -0500
+
+    Suppress warning messages on non-debug builds
+    
+    Regardless of the fix for #47 (156d2bab39092c981e39f2465b92cf2e86c6b32f),
+    LOCKDEP might still report warning messages. This commit silnce them on
+    non-debug build. If P_LKRG_DEBUG_BUILD is enabled, such information will
+    be still available.
+
+commit 156d2bab39092c981e39f2465b92cf2e86c6b32f
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Thu Feb 11 15:12:06 2021 -0500
+
+    Add missing synchronization with kprobe optimizer
+    
+    If kernel is compiled with CONFIG_OPTPROBES we must synchronize with kprobe
+    optimizer during the process of creating database. LKRG places many
+    kretprobes which modifies .text section. In the standard scenario after
+    placing the kprobes, LKRG can safely calculate the hash of all .text
+    sections. However, if CONFIG_OPTPROBES is enabled, placed kprobes could be
+    optimized. Optimization modifies .text seciton by converting kprobes into
+    FTRACE which using different hooking mechanism. If LKRG is in the process
+    of building the hash database and optimizer is running parallel, at least
+    we could have FP and at most deadlock.
+    This fix addresses described issue and reported bug #47
+
+commit 62de614bab7ca495f7da474abb2610f5e825a850
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Thu Feb 11 14:43:49 2021 -0500
+
+    Do not resolve 'native_write_cr4' on AARCH64
+    
+    Since kernel 5.8+ 'native_write_cr4' must be manually resolved. However, this is X86 specific code which should nbot be executed on other platforms. This commit fixes that and addresses #48
+
+commit 993be4b6249849abdc33e18d959c29cc6a8aba9e
+Author: Solar Designer <solar@openwall.com>
+Date:   Sun Feb 7 14:09:56 2021 +0100
+
+    Travis CI: Disable the only remaining arm64 build
+    
+    Unfortunately, "sudo m-a prepare" keeps failing on Travis' arm64 hosts
+    most of the time lately.
+
+commit 7f9742103ec62a0de7487aaf77ba53d7f8bd334f
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Sat Feb 6 20:33:03 2021 -0500
+
+    Add dependency on CONFIG_OPTPROBES
+    
+    If CONFIG_OPTPROBES is not enabled, don't try to sync with kprobe optimizer
+
+commit 7d45ab04d341ab2235cc364b2a8cfb45302389bb
+Author: Adam_pi3 <pi3@pi3.com.pl>
+Date:   Sat Feb 6 20:15:42 2021 -0500
+
+    Introduce a new compilation macro - P_KERNEL_AGGRESSIVE_INLINING
+    
+    Some custom compilation of the kernel might aggresively inline critical
+    functions (from LKRG perspective). That's problematic for the project.
+    However, some of the problems *might* be solved by uncommenting this new
+    definition (P_KERNEL_AGGRESSIVE_INLINING). Unfortunately, not all of the
+    problems can be solved by it (at least no for now). You need to experiment.
+    This can be useful to address issues like #40
 
 commit 67fa1a41bc0ca4b4d5beb7281f6ec1b544ae7e68
 Author: Patrick Schleizer <adrelanos@whonix.org>
