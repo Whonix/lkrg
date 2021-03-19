@@ -6,7 +6,6 @@
 #  - Adam 'pi3' Zabrocki (http://pi3.com.pl)
 ##
 
-P_PWD=`pwd`
 P_LKRG_SYSTEMD="scripts/bootup/systemd/lkrg-systemd.sh"
 
 P_RED='\033[0;31m'
@@ -16,10 +15,10 @@ P_NC='\033[0m' # No Color
 
 echo -e " ${P_GREEN}[*] ${P_WHITE}Executing LKRG's bootup installation script${P_NC}"
 
-case "`readlink /proc/1/exe`" in
+case "`readlink -e /proc/1/exe`" in
 	/usr/lib/systemd/systemd | \
 	/lib/systemd/systemd)
-		$P_PWD/$P_LKRG_SYSTEMD "$@"
+		exec "$P_LKRG_SYSTEMD" "$@"
 		;;
 	*)
 		echo -e "  ${P_RED}[-] Unsupported init system: not systemd or not running as root?${P_NC}"

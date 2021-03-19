@@ -142,12 +142,12 @@ static inline unsigned int p_core_size(struct module *p_mod) {
 
 #ifdef CONFIG_HAVE_ARCH_JUMP_LABEL_RELATIVE
 
-static inline unsigned long long p_jump_entry_code(const struct jump_entry *entry) {
-    return (unsigned long long)&entry->code + entry->code;
+static inline unsigned long p_jump_entry_code(const struct jump_entry *entry) {
+    return (unsigned long)((unsigned long)&entry->code + entry->code);
 }
 
-static inline unsigned long long p_jump_entry_target(const struct jump_entry *entry) {
-    return (unsigned long long)&entry->target + entry->target;
+static inline unsigned long p_jump_entry_target(const struct jump_entry *entry) {
+    return (unsigned long)((unsigned long)&entry->target) + entry->target;
 }
 
 static inline struct static_key *p_jump_entry_key(const struct jump_entry *entry) {
@@ -158,12 +158,12 @@ static inline struct static_key *p_jump_entry_key(const struct jump_entry *entry
 
 #else
 
-static inline unsigned long long p_jump_entry_code(const struct jump_entry *entry) {
-    return (unsigned long long)entry->code;
+static inline unsigned long p_jump_entry_code(const struct jump_entry *entry) {
+    return (unsigned long)entry->code;
 }
 
-static inline unsigned long long p_jump_entry_target(const struct jump_entry *entry) {
-    return (unsigned long long)entry->target;
+static inline unsigned long p_jump_entry_target(const struct jump_entry *entry) {
+    return (unsigned long)entry->target;
 }
 
 static inline struct static_key *p_jump_entry_key(const struct jump_entry *entry)  {
@@ -200,6 +200,7 @@ static inline int p_ddebug_remove_module(const char *p_name) {
 /*
  * Get
  */
+ #if defined(CONFIG_X86_64)
 static inline unsigned long p_regs_get_arg1(struct pt_regs *p_regs) {
    return p_regs->di;
 }
@@ -247,9 +248,67 @@ static inline unsigned long p_syscall_get_arg2(struct pt_regs *p_regs) {
 #endif
 }
 
+ #else
+
+static inline unsigned long p_regs_get_arg1(struct pt_regs *p_regs) {
+   return p_regs->ax;
+}
+
+static inline unsigned long p_regs_get_arg2(struct pt_regs *p_regs) {
+   return p_regs->dx;
+}
+
+static inline unsigned long p_regs_get_arg3(struct pt_regs *p_regs) {
+   return p_regs->cx;
+}
+
+static inline unsigned long p_regs_get_fp(struct pt_regs *p_regs) {
+   return p_regs->bp;
+}
+
+static inline unsigned long p_regs_get_sp(struct pt_regs *p_regs) {
+   return p_regs->sp;
+}
+
+static inline unsigned long p_regs_get_ip(struct pt_regs *p_regs) {
+   return p_regs->ip;
+}
+
+static inline unsigned long p_regs_get_ret(struct pt_regs *p_regs) {
+   return p_regs->ax;
+}
+
+static inline unsigned long p_get_thread_sp(struct task_struct *p_arg) {
+   return p_arg->thread.sp;
+}
+
+/*
+ * Syscalls
+ */
+static inline unsigned long p_syscall_get_arg1(struct pt_regs *p_regs) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0) && defined(CONFIG_ARCH_HAS_SYSCALL_WRAPPER)
+   return p_regs_get_arg2((struct pt_regs *)p_regs_get_arg1(p_regs));
+#else
+   return p_regs_get_arg2(p_regs);
+#endif
+}
+
+static inline unsigned long p_syscall_get_arg2(struct pt_regs *p_regs) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0) && defined(CONFIG_ARCH_HAS_SYSCALL_WRAPPER)
+   return p_regs_get_arg3((struct pt_regs *)p_regs_get_arg1(p_regs));
+#else
+   return p_regs_get_arg3(p_regs);
+#endif
+}
+
+ #endif
+
+
 /*
  * Set
  */
+ #if defined(CONFIG_X86_64)
+
 static inline void p_regs_set_arg1(struct pt_regs *p_regs, unsigned long p_val) {
    p_regs->di = p_val;
 }
@@ -281,36 +340,93 @@ static inline void p_syscall_set_arg2(struct pt_regs *p_regs, unsigned long p_va
 #endif
 }
 
+ #else
+
+static inline void p_regs_set_arg1(struct pt_regs *p_regs, unsigned long p_val) {
+   p_regs->ax = p_val;
+}
+
+static inline void p_regs_set_arg2(struct pt_regs *p_regs, unsigned long p_val) {
+   p_regs->dx = p_val;
+}
+
+static inline void p_regs_set_arg3(struct pt_regs *p_regs, unsigned long p_val) {
+   p_regs->cx = p_val;
+}
+
+static inline void p_regs_set_ip(struct pt_regs *p_regs, unsigned long p_val) {
+   p_regs->ip = p_val;
+}
+
+/*
+ * Syscalls
+ */
+static inline void p_syscall_set_arg1(struct pt_regs *p_regs, unsigned long p_val) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0) && defined(CONFIG_ARCH_HAS_SYSCALL_WRAPPER)
+   p_regs_set_arg2((struct pt_regs *)p_regs_get_arg1(p_regs), p_val);
+#else
+   p_regs_set_arg2(p_regs, p_val);
+#endif
+}
+
+static inline void p_syscall_set_arg2(struct pt_regs *p_regs, unsigned long p_val) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0) && defined(CONFIG_ARCH_HAS_SYSCALL_WRAPPER)
+   p_regs_set_arg3((struct pt_regs *)p_regs_get_arg1(p_regs), p_val);
+#else
+   p_regs_set_arg3(p_regs, p_val);
+#endif
+}
+
+ #endif
+
+
 static inline int p_set_memory_rw(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_rw)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_page_attr_set_clr)(&p_addr, p_numpages,
                                             __pgprot(_PAGE_RW),
                                             __pgprot(0),
                                             0, 0, NULL);
+#endif
 }
 
 static inline int p_set_memory_ro(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_ro)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_page_attr_set_clr)(&p_addr, p_numpages,
                                             __pgprot(0),
                                             __pgprot(_PAGE_RW),
                                             0, 0, NULL);
+#endif
 }
 
 static inline int p_set_memory_np(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return 0x0;
+//   return P_SYM(p_kernel_set_memory_np)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_page_attr_set_clr)(&p_addr, p_numpages,
                                             __pgprot(0),
                                             __pgprot(_PAGE_PRESENT),
                                             0, 0, NULL);
+#endif
 }
 
 static inline int p_set_memory_p(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return 0x0;
+#else
    return P_SYM(p_change_page_attr_set_clr)(&p_addr, p_numpages,
                                             __pgprot(_PAGE_PRESENT),
                                             __pgprot(0),
                                             0, 0, NULL);
+#endif
 }
 
 static inline void p_lkrg_open_rw_x86(void) {
@@ -447,16 +563,24 @@ static inline void p_syscall_set_arg2(struct pt_regs *p_regs, unsigned long p_va
 
 static inline int p_set_memory_rw(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_rw)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(0),
                                         __pgprot(L_PTE_RDONLY));
+#endif
 }
 
 static inline int p_set_memory_ro(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_ro)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(L_PTE_RDONLY),
                                         __pgprot(0));
+#endif
 }
 
 static inline void p_lkrg_open_rw(void) {
@@ -571,30 +695,46 @@ static inline void p_syscall_set_arg2(struct pt_regs *p_regs, unsigned long p_va
 
 static inline int p_set_memory_rw(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_rw)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(PTE_WRITE),
                                         __pgprot(PTE_RDONLY));
+#endif
 }
 
 static inline int p_set_memory_ro(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_ro)(p_addr, p_numpages);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(PTE_RDONLY),
                                         __pgprot(PTE_WRITE));
+#endif
 }
 
 static inline int p_set_memory_np(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_valid)(p_addr, p_numpages, 0);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(0),
                                         __pgprot(PTE_VALID));
+#endif
 }
 
 static inline int p_set_memory_p(unsigned long p_addr, int p_numpages) {
 
+#if defined(P_KERNEL_AGGRESSIVE_INLINING)
+   return P_SYM(p_kernel_set_memory_valid)(p_addr, p_numpages, 1);
+#else
    return P_SYM(p_change_memory_common)(p_addr, p_numpages,
                                         __pgprot(PTE_VALID),
                                         __pgprot(0));
+#endif
 }
 
 static inline void p_lkrg_open_rw(void) {
